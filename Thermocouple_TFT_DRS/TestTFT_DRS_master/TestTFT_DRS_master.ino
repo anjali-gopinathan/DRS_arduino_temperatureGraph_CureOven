@@ -3,14 +3,6 @@
 #include "Adafruit_RA8875.h"
 #include <Adafruit_MAX31856.h>
 
-// Library only supports hardware SPI at this time
-// Connect SCLK to UNO Digital #13 (Hardware SPI clock)
-// Connect MISO to UNO Digital #12 (Hardware SPI MISO)
-// Connect MOSI to UNO Digital #11 (Hardware SPI MOSI)
-//#define RA8875_INT 3
-//#define RA8875_CS 10
-//#define RA8875_RESET 9
-
 #define RA8875_INT 18
 #define RA8875_CS 53
 #define RA8875_RESET 16
@@ -40,23 +32,21 @@ void setup()
   tft.PWM1out(255);
   tft.fillScreen(RA8875_BLACK);
 
-  /* Switch to text mode */  
   tft.textMode();
-  
 
-  
-  /* Set a solid for + bg color ... */
-  
-  /* ... or a fore color plus a transparent background */
-
-  
-  /* Set the cursor location (in pixels) */
   tft.textSetCursor(10, 10);
   
   /* Render some text! */
   tft.setTextSize(2);
   //tft.textWrite("Hello world Hello world Hello world Hello world Hello world Hello world Hello world Hello world\nHello world Hello world Hello world Hello world Hello world Hello world Hello world Hello world");
   //Serial.print("Hello world message has been sent to screen\n");
+
+//following code doesn't work (part with lines and strokes)
+//  tft.stroke(255, 255, 255); // set the stroke color to white
+//  tft.line(100, 50, 100, 380); // draw a y-axis across the screen
+//
+//  tft.stroke(255, 255, 255); // set the stroke color to white
+//  tft.line(98, 378, 780, 98); // draw a x-axis across the screen
 
 
   char string[15] = "Hello, World! ";
