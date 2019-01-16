@@ -16,8 +16,9 @@
 
 Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 Adafruit_MAX31856 tc1 = Adafruit_MAX31856(38, 39, 37, 36);
-
+int TwentySecondPixel = 60, index=0;
 //uint16_t tx, ty;
+float storedTemperature[720];
 
 void setup() 
 {
@@ -42,7 +43,7 @@ void setup()
   
   tft.textSetCursor(10, 10);
 
-  //tft.setRotation(0);
+//  tft.setRotation(0);
   /* Render some text! */
 
 
@@ -85,14 +86,16 @@ void setup()
 //  tft.textEnlarge(0.7);
 //  tft.textTransparent(GREENCOLOR);
 //  tft.textWrite("Start");
-    tft.drawPixel(780,10,LIMEGREENCOLOR);
+//    tft.drawPixel(780,10,LIMEGREENCOLOR);
 
+//  int TwentySecondPixel = 60;
 }
 
 void loop() 
 {
    //tft.fillScreen(RA8875_BLACK);
   tft.fillRect(100,440,480,40,BLACKCOLOR);  //refresh the current temp label
+  tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
 
   float currentTemp = tc1.readThermocoupleTemperature();  //degrees celsius
   char temperature_string[5];
@@ -109,12 +112,15 @@ void loop()
   tft.textWrite(temperature_string);
 
 
-//  int TwentySecondPixel = 60;
-//  int TempPixel = 400- ((int)(currentTemp) *4);
-////  tft.drawLine(TwentySecondPixel,); //drawLine(x0,y0,x1,y1,color);
-//  tft.drawPixel(TwentySecondPixel, TempPixel, LIMEGREENCOLOR);
-//  TwentySecondPixel++;
-
-  delay(1000);//20 seconds refresh
-
+  storedTemperature[index] = currentTemp;
+  int TempPixel = 400- ((int)(currentTemp) *4);
+  if(TwentySecondPixel >= 60 && TwentySecondPixel <=790){
+    ////  tft.drawLine(TwentySecondPixel,); //drawLine(x0,y0,x1,y1,color);
+    //  tft.drawPixel(TwentySecondPixel, TempPixel, LIMEGREENCOLOR);
+    
+    tft.drawLine(TwentySecondPixel, TempPixel, TwentySecondPixel+2, TempPixel, WHITECOLOR);
+    TwentySecondPixel+=3;
+  }
+  delay(0.5*1000);//20 seconds refresh
+  index++;
 }
