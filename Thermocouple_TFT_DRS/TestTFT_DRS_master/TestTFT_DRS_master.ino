@@ -3,6 +3,7 @@
 #include "Adafruit_RA8875.h"
 #include <Adafruit_MAX31856.h>
 //#include <TFT.h>
+//#include <SD.h>
 
 #define RA8875_INT 18
 #define RA8875_CS 53
@@ -16,8 +17,11 @@
 
 Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 Adafruit_MAX31856 tc1 = Adafruit_MAX31856(38, 39, 37, 36);
+
+//File myFile;
+
 int TwentySecondPixel = 60, index=0;
-//uint16_t tx, ty;
+uint16_t tx, ty;
 float storedTemperature[720];
 
 void setup() 
@@ -49,6 +53,7 @@ void setup()
 
 //longest temp time = 230 min
 //Draw Graph outline
+  delay(5000);
   tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
 
   tft.textTransparent(RA8875_WHITE);
@@ -79,16 +84,44 @@ void setup()
     dtostrf( (int)(( 390-y )/4  ), 2, 0, tempValue_String);
     tft.textWrite(tempValue_String);
   }
-  //start/stop button:
-//  tft.fillRect(0,275,80,50,BLUECOLOR);  //blue
+  //button:
+//  tft.fillRect(0,440,50,40,BLUECOLOR);  //blue
 //  
-//  tft.textSetCursor(0,280);
+//  tft.textSetCursor(0,440);
 //  tft.textEnlarge(0.7);
-//  tft.textTransparent(GREENCOLOR);
-//  tft.textWrite("Start");
+//  tft.textTransparent(BLACKCOLOR);
+//  tft.textWrite("Write to SD");
 //    tft.drawPixel(780,10,LIMEGREENCOLOR);
 
-//  int TwentySecondPixel = 60;
+
+//    pinMode(4, OUTPUT);
+//    digitalWrite(4, HIGH);
+//
+//  Serial.print("Initializing SD card...");
+//
+//  if (!SD.begin(4)) {
+//    Serial.println("initialization failed!");
+//    while (1);
+//  }
+//  Serial.println("initialization done.");
+//
+//  if (SD.exists("thermocoupleTempData.txt")) {
+//    Serial.println("thermocoupleTempData.txt exists.");
+//  } else {
+//    Serial.println("thermocoupleTempData.txt doesn't exist.");
+//  }
+//
+//  // open a new file and immediately close it:
+//  Serial.println("Creating thermocoupleTempData.txt...");
+//  myFile = SD.open("thermocoupleTempData.txt", FILE_WRITE);
+//
+//  // Check to see if the file exists:
+//  if (SD.exists("thermocoupleTempData.txt")) {
+//    Serial.println("thermocoupleTempData.txt exists.");
+//  } else {
+//    Serial.println("thermocoupleTempData.txt doesn't exist.");
+//  }
+
 }
 
 void loop() 
@@ -122,5 +155,26 @@ void loop()
     TwentySecondPixel+=3;
   }
   delay(0.5*1000);//20 seconds refresh
-  index++;
+
+//  if (tft.touched())
+//  {
+//    tft.touchRead(&tx, &ty);
+////    point->tx = tx;
+////    point->ty = ty;
+//    Serial.print("Touch: ");
+//    Serial.print(tx); Serial.print(", "); Serial.println(ty);
+//
+//    if(tx >=0 && tx <= 50 && ty >=440 && ty <= 480){
+//       tft.fillRect(0,440,50,40,WHITECOLOR);  //blue
+//       myFile.println(storedTemperature[index]);
+//
+//    }
+//  }
+//  else
+//  {
+//    tx = 0;
+//    ty = 0;
+//  }
+    index++;
+
 }
