@@ -2,7 +2,6 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_RA8875.h"
 #include <Adafruit_MAX31856.h>
-//#include <TFT.h>
 //#include <SD.h>
 
 #define RA8875_INT 18
@@ -41,17 +40,11 @@ void setup()
   tft.GPIOX(true);      // Enable TFT - display enable tied to GPIOX
   tft.PWM1config(true, RA8875_PWM_CLK_DIV1024); // PWM output for backlight
   tft.PWM1out(255);
-//  tft.fillScreen(RA8875_BLACK);
   tft.fillScreen(BLACKCOLOR);
   tft.textMode();
   
   tft.textSetCursor(10, 10);
 
-//  tft.setRotation(0);
-  /* Render some text! */
-
-
-//longest temp time = 230 min
 //Draw Graph outline
   delay(5000);
   tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
@@ -63,9 +56,6 @@ void setup()
   tft.textSetCursor(0,0);
   tft.textWrite("Temp (C)        Temperature vs time");
   
-//  tft.textSetCursor(10,55);
-//  tft.textWrite("90");
-
   //x axis labels:
   char minuteNumber_String[3];
   tft.textEnlarge(0.6);
@@ -148,14 +138,12 @@ void loop()
   storedTemperature[index] = currentTemp;
   int TempPixel = 400- ((int)(currentTemp) *4);
   if(TwentySecondPixel >= 60 && TwentySecondPixel <=790){
-    ////  tft.drawLine(TwentySecondPixel,); //drawLine(x0,y0,x1,y1,color);
-    //  tft.drawPixel(TwentySecondPixel, TempPixel, LIMEGREENCOLOR);
     
     tft.drawLine(TwentySecondPixel, TempPixel, TwentySecondPixel+2, TempPixel, WHITECOLOR);
     TwentySecondPixel+=3;
   }
   delay(0.5*1000);//20 seconds refresh
-
+//before index++ in loop() method
 //  if (tft.touched())
 //  {
 //    tft.touchRead(&tx, &ty);
