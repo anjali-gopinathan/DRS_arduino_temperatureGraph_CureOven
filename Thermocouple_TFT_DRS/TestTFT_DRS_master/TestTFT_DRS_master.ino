@@ -1,8 +1,8 @@
-#include <SPI.h>
+#include <SPI.h>    
 #include "Adafruit_GFX.h"
 #include "Adafruit_RA8875.h"
 #include <Adafruit_MAX31856.h>
-//#include <SD.h>
+#include <SD.h>
 
 #define RA8875_INT 18
 #define RA8875_CS 53
@@ -17,7 +17,7 @@
 Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 Adafruit_MAX31856 tc1 = Adafruit_MAX31856(38, 39, 37, 36);
 
-//File myFile;
+File myFile;
 
 int TwentySecondPixel = 60, index=0;
 uint16_t tx, ty;
@@ -47,6 +47,50 @@ void setup()
 
 //Draw Graph outline
   delay(5000);
+
+ Serial.print("Initializing SD card...");
+
+  if (!SD.begin(5)) {
+    Serial.println("initialization failed!");
+    while (1);
+  }
+  Serial.println("initialization done.");
+
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  myFile = SD.open("tcData.txt", FILE_WRITE);
+
+  // if the file opened okay, write to it:
+  if (myFile) {
+    Serial.print("Writing to tcData.txt...");
+    myFile.println("testing 1, 2, 3.");
+    // close the file:
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening tcData.txt");
+  }
+
+  // re-open the file for reading:
+  myFile = SD.open("tcData.txt");
+  if (myFile) {
+    Serial.println("tcData.txt:");
+
+    // read from the file until there's nothing else in it:
+    while (myFile.available()) {
+      Serial.write(myFile.read());
+    }
+    // close the file:
+    myFile.close();
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening tcData.txt");
+  }
+
+
+
+  
   tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
 
   tft.textTransparent(RA8875_WHITE);
@@ -75,47 +119,20 @@ void setup()
     tft.textWrite(tempValue_String);
   }
   //button:
-//  tft.fillRect(0,440,50,40,BLUECOLOR);  //blue
-//  
-//  tft.textSetCursor(0,440);
-//  tft.textEnlarge(0.7);
-//  tft.textTransparent(BLACKCOLOR);
-//  tft.textWrite("Write to SD");
-//    tft.drawPixel(780,10,LIMEGREENCOLOR);
-
-
-//    pinMode(4, OUTPUT);
-//    digitalWrite(4, HIGH);
-//
-//  Serial.print("Initializing SD card...");
-//
-//  if (!SD.begin(4)) {
-//    Serial.println("initialization failed!");
-//    while (1);
-//  }
-//  Serial.println("initialization done.");
-//
-//  if (SD.exists("thermocoupleTempData.txt")) {
-//    Serial.println("thermocoupleTempData.txt exists.");
-//  } else {
-//    Serial.println("thermocoupleTempData.txt doesn't exist.");
-//  }
-//
-//  // open a new file and immediately close it:
-//  Serial.println("Creating thermocoupleTempData.txt...");
-//  myFile = SD.open("thermocoupleTempData.txt", FILE_WRITE);
-//
-//  // Check to see if the file exists:
-//  if (SD.exists("thermocoupleTempData.txt")) {
-//    Serial.println("thermocoupleTempData.txt exists.");
-//  } else {
-//    Serial.println("thermocoupleTempData.txt doesn't exist.");
-//  }
+  tft.fillRect(0,440,50,40,BLUECOLOR);  //blue
+  
+  tft.textSetCursor(0,440);
+  tft.textEnlarge(0.7);
+  tft.textTransparent(BLACKCOLOR);
+  tft.textWrite("Write to SD");
+    tft.drawPixel(780,10,LIMEGREENCOLOR);
 
 }
 
 void loop() 
 {
+    tsPoint_t raw;
+
    //tft.fillScreen(RA8875_BLACK);
   tft.fillRect(100,440,480,40,BLACKCOLOR);  //refresh the current temp label
   tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
@@ -144,25 +161,60 @@ void loop()
   }
   delay(0.5*1000);//20 seconds refresh
 //before index++ in loop() method
-//  if (tft.touched())
-//  {
-//    tft.touchRead(&tx, &ty);
-////    point->tx = tx;
-////    point->ty = ty;
-//    Serial.print("Touch: ");
-//    Serial.print(tx); Serial.print(", "); Serial.println(ty);
-//
-//    if(tx >=0 && tx <= 50 && ty >=440 && ty <= 480){
-//       tft.fillRect(0,440,50,40,WHITECOLOR);  //blue
+  if (tft.touched())
+  {
+    tft.touchRead(&tx, &ty);
+
+    Serial.print("Touch: ");
+    Serial.print(tx); Serial.print(", "); Serial.println(ty);
+
+    if(tx >=0 && tx <= 50 && ty >=440 && ty <= 480){
+       tft.fillRect(0,440,50,40,WHITECOLOR);  //blue
 //       myFile.println(storedTemperature[index]);
-//
-//    }
-//  }
-//  else
-//  {
-//    tx = 0;
-//    ty = 0;
-//  }
+         Serial.print("Writing to file: "); 
+         Serial.println(storedTemperature[index]);
+    }
+  }
+  else
+  {
+    tx = 0;
+    ty = 0;
+  }
+  waitForTouchEvent(&raw);
+
     index++;
 
+}
+
+void waitForTouchEvent(tsPoint_t * point)
+{
+  /* Clear the touch data object and placeholder variables */
+  memset(point, 0, sizeof(tsPoint_t));
+
+  
+  /* Clear any previous interrupts to avoid false buffered reads */
+  uint16_t x, y;
+  tft.touchRead(&x, &y);
+  delay(1);
+
+  /* Wait around for a new touch event (INT pin goes low) */
+  while (digitalRead(RA8875_INT))
+  {
+    Serial.println("waiting for RA8875 interrupt");
+  }
+  
+  /* Make sure this is really a touch event */
+  if (tft.touched())
+  {
+    tft.touchRead(&x, &y);
+    point->x = x;
+    point->y = y;
+    Serial.print("Touch: ");
+    Serial.print(point->x); Serial.print(", "); Serial.println(point->y);
+  }
+  else
+  {
+    point->x = 0;
+    point->y = 0;
+  }
 }
