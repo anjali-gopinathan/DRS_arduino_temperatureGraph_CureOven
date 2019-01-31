@@ -36,9 +36,10 @@ void setup()
     Serial.println("RA8875 Not Found!");
     while (1);
   }
+  Serial.println("Found RA8875");
+
   tc1.begin();
   tc1.setThermocoupleType(MAX31856_TCTYPE_K);
-
 
   tft.displayOn(true);
   tft.GPIOX(true);      // Enable TFT - display enable tied to GPIOX
@@ -46,11 +47,12 @@ void setup()
   tft.PWM1out(255);
   tft.fillScreen(BLACKCOLOR);
   tft.textMode();
+//    pinMode(RA8875_INT, INPUT);
+//  digitalWrite(RA8875_INT, HIGH);
   tft.touchEnable(true);
 
   tft.textSetCursor(10, 10);
 
-//Draw Graph outline
   delay(5000);
 
  Serial.print("Initializing SD card...");
@@ -95,7 +97,8 @@ void setup()
 
 
 
-  
+  //Draw Graph outline
+
   tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
 
   tft.textTransparent(RA8875_WHITE);

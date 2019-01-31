@@ -1,35 +1,37 @@
 /*Link to source code: 
  * https://github.com/adafruit/Adafruit_RA8875/blob/master/examples/ts_calibration/ts_calibration.ino
- * */
+ *Merged version of TestTFT_DRS_master.ino and Test_touchscreenCalibration.ino
+ */
+ 
 #include <SPI.h>
-#include "Adafruit_GFX.h"
-#include "Adafruit_RA8875.h"
+#include "Adafruit_GFX.h"       //graphics for tft display
+#include "Adafruit_RA8875.h"    //display driver board
+#include <Adafruit_MAX31856.h>  //thermocouple amplifier board
+//#include <SD.h>               //SD card
 
 #define RA8875_INT     18
 #define RA8875_CS      53
 #define RA8875_RESET   16
 
+#define WHITECOLOR 0xFFFF // White
+#define BLACKCOLOR 0x0000  // Black
+#define BLUECOLOR 0x076eff //Blue
+#define GREENCOLOR 0x45ad47 //Green
+#define LIMEGREENCOLOR 0x00FF00
+
 Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
+Adafruit_MAX31856 tc1 = Adafruit_MAX31856(38, 39, 37, 36);
+
+//File myFile;
 tsPoint_t       _tsLCDPoints[3]; 
 tsPoint_t       _tsTSPoints[3]; 
 tsMatrix_t      _tsMatrix;
 
-/**************************************************************************/
-/*!
-    @brief Calculates the difference between the touch screen and the
-           actual screen co-ordinates, taking into account misalignment
-           and any physical offset of the touch screen.
-    @note  This is based on the public domain touch screen calibration code
-           written by Carlos E. Vidales (copyright (c) 2001).
-           For more information, see the following app notes:
-           - AN2173 - Touch Screen Control and Calibration
-             Svyatoslav Paliy, Cypress Microsystems
-           - Calibration in touch-screen systems
-             Wendy Fang and Tony Chang,
-             Analog Applications Journal, 3Q 2007 (Texas Instruments)
-*/
+//uint16_t tx, ty;
+//float storedTemperature[720];
 
-/**************************************************************************/
+int TwentySecondPixel = 60, index=0;
+
 int setCalibrationMatrix( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatrix_t * matrixPtr)
 {
   int  retValue = 0;
@@ -164,9 +166,9 @@ void waitForTouchEvent(tsPoint_t * point)
 /**************************************************************************/
 tsPoint_t renderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
 {
-  tft.fillScreen(RA8875_WHITE);
-  tft.drawCircle(x, y, radius, RA8875_RED);
-  tft.drawCircle(x, y, radius + 2, 0x8410);  /* 50% Gray */
+//  tft.fillScreen(RA8875_WHITE);
+//  tft.drawCircle(x, y, radius, RA8875_RED);
+//  tft.drawCircle(x, y, radius + 2, 0x8410);  /* 50% Gray */
 
   // Wait for a valid touch events
   tsPoint_t point = { 0, 0 };
@@ -280,10 +282,18 @@ void setup()
 
   /* Enables the display and sets up the backlight */
   Serial.println("Found RA8875");
+
+  //enable thermocouple
+  tc1.begin();
+  tc1.setThermocoupleType(MAX31856_TCTYPE_K);
+  
   tft.displayOn(true);
   tft.GPIOX(true); // Enable TFT - display enable tied to GPIOX
   tft.PWM1config(true, RA8875_PWM_CLK_DIV1024); // PWM output for backlight
   tft.PWM1out(255);
+
+  tft.fillScreen(BLACKCOLOR);
+  tft.textMode();
 
   /* Enable the touch screen */
   Serial.println("Enabled the touch screen");
@@ -291,16 +301,81 @@ void setup()
   digitalWrite(RA8875_INT, HIGH);
   tft.touchEnable(true);
 
-  // Try some GFX acceleration!
-  tft.drawCircle(100, 100, 50, RA8875_BLACK);
-  //tft.fillCircle(100, 100, 49, RA8875_GREEN);
-  //tft.drawPixel(10,10,RA8875_BLACK);
-  //tft.drawPixel(11,11,RA8875_BLACK);
-  //tft.drawRect(10, 10, 400, 200, RA8875_GREEN);
-  //tft.fillRect(11, 11, 398, 198, RA8875_BLUE);
-  //tft.drawLine(10, 10, 200, 100, RA8875_RED);
+  tft.textSetCursor(10, 10);
+/*SD card stuff 1002
+ *   delay(5000);
+
+ Serial.print("Initializing SD card...");
+
+  if (!SD.begin(5)) {
+    Serial.println("initialization failed!");
+    while (1);
+  }
+  Serial.println("initialization done.");
+
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  myFile = SD.open("tcData.txt", FILE_WRITE);
+
+  // if the file opened okay, write to it:
+  if (myFile) {
+    Serial.print("Writing to tcData.txt...");
+    myFile.println("testing 1, 2, 3.");
+    // close the file:
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening tcData.txt");
+  }
+
+  // re-open the file for reading:
+  myFile = SD.open("tcData.txt");
+  if (myFile) {
+    Serial.println("tcData.txt:");
+
+    // read from the file until there's nothing else in it:
+    while (myFile.available()) {
+      Serial.write(myFile.read());
+    }
+    // close the file:
+    myFile.close();
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening tcData.txt");
+  }
+
+ */
+  //Draw Graph outline
+
+  tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
+
+  tft.textTransparent(RA8875_WHITE);
+  tft.textSetCursor(635, 440);
+  tft.textEnlarge(1);
+  tft.textWrite("Time (min)");
+  tft.textSetCursor(0,0);
+  tft.textWrite("Temp (C)        Temperature vs time");
+
+  //x axis labels:
+  char minuteNumber_String[3];
+  tft.textEnlarge(0.6);
   
-  tft.fillScreen(RA8875_WHITE);
+  for(int x=50; x<=790; x+=60){
+    tft.textSetCursor(x,410);
+    dtostrf(  ( (x-50)/3 )  , 3, 0, minuteNumber_String);
+
+    tft.textWrite(minuteNumber_String);
+  }
+
+  //y axis labels:
+  char tempValue_String[1];
+  for(int y=390; y>=40; y-=20){
+    tft.textSetCursor(10,y);
+    dtostrf( (int)(( 390-y )/4  ), 2, 0, tempValue_String);
+    tft.textWrite(tempValue_String);
+  }
+  
   delay(100);
     
   /* Start the calibration process */
@@ -317,6 +392,33 @@ void setup()
 /**************************************************************************/
 void loop() 
 {
+  //draw rectangles to clear screen
+  tft.fillRect(100,440,480,40,BLACKCOLOR);  //refresh the current temp label
+  tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
+
+  float currentTemp = tc1.readThermocoupleTemperature();  //degrees celsius
+  char temperature_string[5];
+
+  dtostrf(currentTemp, 5, 1, temperature_string);
+
+  Serial.print("Current temp: ");
+  Serial.println(currentTemp);
+
+  tft.textEnlarge(1);
+  tft.textTransparent(RA8875_WHITE);
+  tft.textSetCursor(100,440);
+  tft.textWrite("Current temp (C): ");
+  tft.textWrite(temperature_string);
+
+  int TempPixel = 400- ((int)(currentTemp) *4);
+  if(TwentySecondPixel >= 60 && TwentySecondPixel <=790){
+    
+    tft.drawLine(TwentySecondPixel, TempPixel, TwentySecondPixel+2, TempPixel, WHITECOLOR);
+    TwentySecondPixel+=3;
+  }
+  delay(0.5*1000);//20 seconds refresh
+
+  
   tsPoint_t raw;
   tsPoint_t calibrated;
 
@@ -327,5 +429,5 @@ void loop()
 //  calibrateTSPoint(&calibrated, &raw, &_tsMatrix );
   
   /* Draw a single pixel at the calibrated point */
-  tft.fillCircle(calibrated.x, calibrated.y, 3, RA8875_BLACK);
+//  tft.fillCircle(calibrated.x, calibrated.y, 3, RA8875_BLACK);
 }
