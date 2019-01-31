@@ -18,7 +18,6 @@ Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 Adafruit_MAX31856 tc1 = Adafruit_MAX31856(38, 39, 37, 36);
 
 File myFile;
-
 tsPoint_t       _tsLCDPoints[3]; 
 tsPoint_t       _tsTSPoints[3]; 
 tsMatrix_t      _tsMatrix;
@@ -133,13 +132,13 @@ void setup()
   tft.textWrite("Write to SD");
     tft.drawPixel(780,10,LIMEGREENCOLOR);
 
-  Serial.println("Calling tsCalibrate()...");
-  tsCalibrate();
+//  Serial.println("Calling tsCalibrate()...");
+//  tsCalibrate();            //comment THIS LINE to not glitch 2001
 }
 
-void loop() 
+void loop()
 {
-    tsPoint_t raw;
+//    tsPoint_t raw;
 
    //tft.fillScreen(RA8875_BLACK);
   tft.fillRect(100,440,480,40,BLACKCOLOR);  //refresh the current temp label
@@ -188,7 +187,7 @@ void loop()
 //    tx = 0;
 //    ty = 0;
 //  }
-  waitForTouchEvent(&raw);
+//  waitForTouchEvent(&raw);
 
     index++;
 
