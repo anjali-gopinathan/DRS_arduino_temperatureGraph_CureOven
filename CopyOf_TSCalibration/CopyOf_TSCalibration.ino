@@ -137,7 +137,7 @@ void waitForTouchEvent(tsPoint_t * point)
   delay(1);
 
   /* Wait around for a new touch event (INT pin goes low) */
-  while (digitalRead(RA8875_INT))
+  if (digitalRead(RA8875_INT))
   {
     //Serial.println("Waiting for digital interrupt");
   }
@@ -274,9 +274,9 @@ void setup()
   Serial.println("Hello, RA8875!");
 
   /* Initialise the display using 'RA8875_480x272' or 'RA8875_800x480' */
-    if (!tft.begin(RA8875_480x272)) 
+    if (!tft.begin(RA8875_800x480)) 
   {
-    Serial.println("RA8875 not found ... check your wires!");
+    Serial.println("RA8875 800x480 not found ... check your wires!");
     while (1);
   }
 
@@ -292,8 +292,8 @@ void setup()
   tft.PWM1config(true, RA8875_PWM_CLK_DIV1024); // PWM output for backlight
   tft.PWM1out(255);
 
-//  tft.fillScreen(BLACKCOLOR);
-//  tft.textMode();
+  tft.fillScreen(BLACKCOLOR);
+  tft.textMode();
 
   /* Enable the touch screen */
   Serial.println("Enabled the touch screen");
@@ -304,7 +304,7 @@ void setup()
   tft.fillScreen(BLACKCOLOR);
 
 //  tft.textSetCursor(10, 10);
-//SD card stuff 1002
+//SD card stuff
     delay(5000);
 
  Serial.print("Initializing SD card...");
@@ -318,21 +318,21 @@ void setup()
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   myFile = SD.open("tcData.txt", FILE_WRITE);
-
-  // if the file opened okay, write to it:
-  if (myFile) {
-    Serial.print("Writing to tcData.txt...");
-    myFile.println("testing 1, 2, 3.");
-    // close the file:
-    myFile.close();
-    Serial.println("done.");
-  } else {
-    // if the file didn't open, print an error:
-    Serial.println("error opening tcData.txt");
-  }
+//
+//  // if the file opened okay, write to it:
+//  if (myFile) {
+//    Serial.print("Writing to tcData.txt...");
+//    myFile.println("testing 1, 2, 3.");
+//    // close the file:
+//    myFile.close();
+//    Serial.println("done.");
+//  } else {
+//    // if the file didn't open, print an error:
+//    Serial.println("error opening tcData.txt");
+//  }
 
   // re-open the file for reading:
-  myFile = SD.open("tcData.txt");
+//  myFile = SD.open("tcData.txt");
   if (myFile) {
     Serial.println("tcData.txt:");
 
@@ -350,34 +350,41 @@ void setup()
  
   //Draw Graph outline
 
-//  tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
-//
-//  tft.textTransparent(RA8875_WHITE);
-//  tft.textSetCursor(635, 440);
-//  tft.textEnlarge(1);
-//  tft.textWrite("Time (min)");
-//  tft.textSetCursor(0,0);
-//  tft.textWrite("Temp (C)        Temperature vs time");
-//
-//  //x axis labels:
-//  char minuteNumber_String[3];
-//  tft.textEnlarge(0.6);
-//  
-//  for(int x=50; x<=790; x+=60){
-//    tft.textSetCursor(x,410);
-//    dtostrf(  ( (x-50)/3 )  , 3, 0, minuteNumber_String);
-//
-//    tft.textWrite(minuteNumber_String);
-//  }
-//
-//  //y axis labels:
-//  char tempValue_String[1];
-//  for(int y=390; y>=40; y-=20){
-//    tft.textSetCursor(10,y);
-//    dtostrf( (int)(( 390-y )/4  ), 2, 0, tempValue_String);
-//    tft.textWrite(tempValue_String);
-//  }
+  tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
+
+  tft.textTransparent(RA8875_WHITE);
+  tft.textSetCursor(635, 440);
+  tft.textEnlarge(1);
+  tft.textWrite("Time (min)");
+  tft.textSetCursor(0,0);
+  tft.textWrite("Temp (C)        Temperature vs time");
+
+  //x axis labels:
+  char minuteNumber_String[3];
+  tft.textEnlarge(0.6);
   
+  for(int x=50; x<=790; x+=60){
+    tft.textSetCursor(x,410);
+    dtostrf(  ( (x-50)/3 )  , 3, 0, minuteNumber_String);
+
+    tft.textWrite(minuteNumber_String);
+  }
+
+  //y axis labels:
+  char tempValue_String[1];
+  for(int y=390; y>=40; y-=20){
+    tft.textSetCursor(10,y);
+    dtostrf( (int)(( 390-y )/4  ), 2, 0, tempValue_String);
+    tft.textWrite(tempValue_String);
+  }
+  //button:
+  tft.fillRect(0,440,50,40,BLUECOLOR);  //blue
+  
+  tft.textSetCursor(0,440);
+  tft.textEnlarge(0.7);
+  tft.textTransparent(BLACKCOLOR);
+  tft.textWrite("Write to SD");
+    tft.drawPixel(780,10,LIMEGREENCOLOR);
   delay(100);
     
   /* Start the calibration process */
@@ -395,8 +402,8 @@ void setup()
 void loop() 
 {
   //draw rectangles to clear screen
-//  tft.fillRect(100,440,480,40,BLACKCOLOR);  //refresh the current temp label
-//  tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
+  tft.fillRect(100,440,480,40,BLACKCOLOR);  //refresh the current temp label
+  tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
 
   float currentTemp = tc1.readThermocoupleTemperature();  //degrees celsius
   char temperature_string[5];
@@ -406,21 +413,21 @@ void loop()
   Serial.print("Current temp: ");
   Serial.println(currentTemp);
 
-//  tft.textEnlarge(1);
-//  tft.textTransparent(RA8875_WHITE);
-//  tft.textSetCursor(100,440);
-//  tft.textWrite("Current temp (C): ");
-//  tft.textWrite(temperature_string);
+  tft.textEnlarge(1);
+  tft.textTransparent(RA8875_WHITE);
+  tft.textSetCursor(100,440);
+  tft.textWrite("Current temp (C): ");
+  tft.textWrite(temperature_string);
 
   storedTemperature[index] = currentTemp;
 
-//  int TempPixel = 400- ((int)(currentTemp) *4);
-//  if(TwentySecondPixel >= 60 && TwentySecondPixel <=790){
-//    
-//    tft.drawLine(TwentySecondPixel, TempPixel, TwentySecondPixel+2, TempPixel, WHITECOLOR);
-//    TwentySecondPixel+=3;
-//  }
-//  delay(0.5*1000);//20 seconds refresh
+  int TempPixel = 400- ((int)(currentTemp) *4);
+  if(TwentySecondPixel >= 60 && TwentySecondPixel <=790){
+    
+    tft.drawLine(TwentySecondPixel, TempPixel, TwentySecondPixel+2, TempPixel, WHITECOLOR);
+    TwentySecondPixel+=3;
+  }
+  delay(0.5*1000);//20 seconds refresh
 
   
   tsPoint_t raw;
@@ -435,15 +442,21 @@ void loop()
 
     Serial.print("screen touched at ");
     Serial.print(tx); Serial.print(", "); Serial.println(ty);
-//    if(tx >=0 && tx <= 50 && ty >=440 && ty <= 480){
+    if(tx >=0 && tx <= 100 && ty >=880 ){
 //    if(tx >=0 && tx <= 200 && ty >=200 && ty <= 480){
-//       tft.fillRect(0,440,50,40,WHITECOLOR);  //blue
-       myFile.print(index);
-       myFile.print("\t\tTemperature (C):\t");
-       myFile.println(storedTemperature[index]);
-       Serial.print("Writing the following to file: "); 
+       tft.fillRect(0,440,50,40,WHITECOLOR);  //blue
+       myFile = SD.open("tcData.txt", FILE_WRITE);
+
+        for(int i=0; i<sizeof(storedTemperature); i++){
+           myFile.print(index);myFile.print("\t");myFile.print(i);
+           myFile.print("\t\tTemperature (C):\t");
+           myFile.println(storedTemperature[index]);
+        }
+       Serial.print("Writing up to the current temp to file, ending with: "); 
        Serial.println(storedTemperature[index]);
-//    }
+       
+       myFile.close();
+    }
   }
   else
   {

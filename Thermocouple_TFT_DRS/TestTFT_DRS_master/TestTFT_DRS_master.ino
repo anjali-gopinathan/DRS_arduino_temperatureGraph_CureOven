@@ -96,9 +96,6 @@ void setup()
   }
 
 
-
-  //Draw Graph outline
-
   tft.drawRect(60, 50, 730, 350, WHITECOLOR);    //drawRect(x0, y0, width, height, color)
 
   tft.textTransparent(RA8875_WHITE);
