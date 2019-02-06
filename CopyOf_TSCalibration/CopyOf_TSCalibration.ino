@@ -22,9 +22,10 @@
 Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 Adafruit_MAX31856 tc1 = Adafruit_MAX31856(38, 39, 37, 36);
 
-File myFile;
-File trackFile; //file containing a number to keep track of files
-int fileIndex;
+File mainFile;
+File trackerFile; //file containing a number to keep track of files
+char fileIndex;
+char fileName[13];
 tsPoint_t       _tsLCDPoints[3]; 
 tsPoint_t       _tsTSPoints[3]; 
 tsMatrix_t      _tsMatrix;
@@ -318,19 +319,33 @@ void setup()
   Serial.println("initialization done.");
 
   /*Make a txt file in which the only text it contains is the index number of the files on the card*/
-  //  if(SD.exists(FileTracker.txt)){
-//    //change the file FileTracker
-//    char[5] = trackFile.read();
-//  }
-//  else 
-  myFile = SD.open("TCDATA.txt", FILE_WRITE);
+    if(SD.exists("FileTracker.txt")){
+      //change the file FileTracker
+      trackerFile = SD.open("FileTracker.txt");
+      fileIndex = trackerFile.read(); //file index is the number on the fileTracker file
+      fileIndex++;
+      trackerFile.println(fileIndex);
+      trackerFile.close();
+    }
+    else {
+      trackerFile = SD.open("FileTracker.txt");
+      fileIndex = '1';
+      trackerFile.println("1");
+      trackerFile.close();
+    }
+//     fileName = "TCDATA_" + String(fileIndex) + ".txt";
+     fileName[13] = "TCDATA_.txt";
+//     strcat(fileName, &fileIndex);
+//     strcat(fileName, ".txt");  //9, 13
+     fileName[7] = fileIndex;
+     mainFile = SD.open(fileName, FILE_WRITE);
 //
 //  // if the file opened okay, write to it:
-//  if (myFile) {
+//  if (mainFile) {
 //    Serial.print("Writing to tcData.txt...");
-//    myFile.println("testing 1, 2, 3.");
+//    mainFile.println("testing 1, 2, 3.");
 //    // close the file:
-//    myFile.close();
+//    mainFile.close();
 //    Serial.println("done.");
 //  } else {
 //    // if the file didn't open, print an error:
@@ -338,16 +353,16 @@ void setup()
 //  }
 
   // re-open the file for reading:
-//  myFile = SD.open("tcData.txt");
-  if (myFile) {
-    Serial.println("tcData.txt:");
+//  mainFile = SD.open("tcData.txt");
+  if (mainFile) {
+    Serial.print(fileName); Serial.println(" contains:");
 
     // read from the file until there's nothing else in it:
-    while (myFile.available()) {
-      Serial.write(myFile.read());
+    while (mainFile.available()) {
+      Serial.write(mainFile.read());
     }
     // close the file:
-    myFile.close();
+    mainFile.close();
   } else {
     // if the file didn't open, print an error:
     Serial.println("error opening tcData.txt");
@@ -451,17 +466,17 @@ void loop()
     if(tx >=0 && tx <= 100 && ty >=880 ){
 //    if(tx >=0 && tx <= 200 && ty >=200 && ty <= 480){
        tft.fillRect(0,440,50,40,WHITECOLOR);  //blue
-       myFile = SD.open("tcData.txt", FILE_WRITE);
+       mainFile = SD.open(fileName, FILE_WRITE);
 
         for(int i=0; i<index; i++){
-           myFile.print(i);myFile.print("\t");myFile.print(index);
-           myFile.print("\t\tTemperature (C):\t");
-           myFile.println(storedTemperature[i]);
+           mainFile.print(i); mainFile.print("\t"); mainFile.print(index);
+           mainFile.print("\t\tTemperature (C):\t");
+           mainFile.println(storedTemperature[i]);
         }
        Serial.print("Writing up to the current temp to file, ending with: "); 
        Serial.println(storedTemperature[sizeof(storedTemperature)-1]);
        
-       myFile.close();
+       mainFile.close();
     }
   }
   else
