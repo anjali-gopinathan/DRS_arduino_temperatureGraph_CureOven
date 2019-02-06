@@ -23,6 +23,8 @@ Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 Adafruit_MAX31856 tc1 = Adafruit_MAX31856(38, 39, 37, 36);
 
 File myFile;
+File trackFile; //file containing a number to keep track of files
+int fileIndex;
 tsPoint_t       _tsLCDPoints[3]; 
 tsPoint_t       _tsTSPoints[3]; 
 tsMatrix_t      _tsMatrix;
@@ -315,9 +317,13 @@ void setup()
   }
   Serial.println("initialization done.");
 
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
-  myFile = SD.open("tcData.txt", FILE_WRITE);
+  /*Make a txt file in which the only text it contains is the index number of the files on the card*/
+  //  if(SD.exists(FileTracker.txt)){
+//    //change the file FileTracker
+//    char[5] = trackFile.read();
+//  }
+//  else 
+  myFile = SD.open("TCDATA.txt", FILE_WRITE);
 //
 //  // if the file opened okay, write to it:
 //  if (myFile) {
@@ -447,13 +453,13 @@ void loop()
        tft.fillRect(0,440,50,40,WHITECOLOR);  //blue
        myFile = SD.open("tcData.txt", FILE_WRITE);
 
-        for(int i=0; i<sizeof(storedTemperature); i++){
-           myFile.print(index);myFile.print("\t");myFile.print(i);
+        for(int i=0; i<index; i++){
+           myFile.print(i);myFile.print("\t");myFile.print(index);
            myFile.print("\t\tTemperature (C):\t");
-           myFile.println(storedTemperature[index]);
+           myFile.println(storedTemperature[i]);
         }
        Serial.print("Writing up to the current temp to file, ending with: "); 
-       Serial.println(storedTemperature[index]);
+       Serial.println(storedTemperature[sizeof(storedTemperature)-1]);
        
        myFile.close();
     }
