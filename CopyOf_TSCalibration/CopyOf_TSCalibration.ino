@@ -169,10 +169,6 @@ void waitForTouchEvent(tsPoint_t * point)
 /**************************************************************************/
 tsPoint_t renderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
 {
-//  tft.fillScreen(RA8875_WHITE);
-//  tft.drawCircle(x, y, radius, RA8875_RED);
-//  tft.drawCircle(x, y, radius + 2, 0x8410);  /* 50% Gray */
-
   // Wait for a valid touch events
   tsPoint_t point = { 0, 0 };
   
