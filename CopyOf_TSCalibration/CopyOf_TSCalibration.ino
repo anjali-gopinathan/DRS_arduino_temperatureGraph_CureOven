@@ -1,6 +1,6 @@
 /*Link to source code: 
  * https://github.com/adafruit/Adafruit_RA8875/blob/master/examples/ts_calibration/ts_calibration.ino
- *Merged version of TestTFT_DRS_master.ino and Test_touchscreenCalibration.ino
+ *Merged version of TestTFT_DRS_master.ino and Test_touchscreenCalibration.ino (MASTER FILE)
  */
  
 #include <SPI.h>
