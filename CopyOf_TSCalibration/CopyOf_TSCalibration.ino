@@ -317,14 +317,16 @@ void setup()
   /*Make a txt file in which the only text it contains is the index number of the files on the card*/
     if(SD.exists("FileTracker.txt")){
       //change the file FileTracker
-      trackerFile = SD.open("FileTracker.txt");
+      trackerFile = SD.open("FileTracker.txt", FILE_READ);
       fileIndex = trackerFile.read(); //file index is the number on the fileTracker file
       fileIndex++;
+      trackerFile.close();
+      trackerFile = SD.open("FileTracker.txt", FILE_WRITE);
       trackerFile.println(fileIndex);
       trackerFile.close();
     }
     else {
-      trackerFile = SD.open("FileTracker.txt");
+      trackerFile = SD.open("FileTracker.txt", FILE_WRITE);
       fileIndex = '1';
       trackerFile.println("1");
       trackerFile.close();
